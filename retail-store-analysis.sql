@@ -64,9 +64,23 @@ from cte
 where rn = 1
 
 --which sub category had highest growth by profit in 2023 compare to 2022
-
-
-
+with cte as (
+	select sub_category, extract(year from order_date) as year, round(sum(profit)::int,2) as total_profit
+	from cleaned_orders
+	group by sub_category, extract(year from order_date)
+),
+cte2 as(
+	select 
+		sub_category,
+		sum(case when year=2022 then total_profit else 0 end) as profit_2022,
+		sum(case when year=2023 then total_profit else 0 end) as profit_2023
+	from cte
+	group by sub_category
+)
+select *, (profit_2023 - profit_2022) as growth
+from cte2
+order by growth desc
+limit 1
 
 
 
